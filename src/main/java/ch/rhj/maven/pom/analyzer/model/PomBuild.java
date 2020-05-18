@@ -7,5 +7,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class PomBuild {
 
 	@JsonProperty("pluginManagement")
-	public PomPluginManagement pluginManagement;
+	private PomPluginManagement pluginManagement;
+
+	public PomPluginManagement pluginManagement() {
+
+		return pluginManagement == null ? (pluginManagement = new PomPluginManagement()) : pluginManagement;
+	}
 }

@@ -1,6 +1,7 @@
 package ch.rhj.maven.pom.analyzer.model;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,10 +10,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class PomDependencyManagement {
 
 	@JsonProperty("dependencies")
-	public List<PomDependency> dependencies;
+	private List<PomDependency> dependencies;
+
+	public Stream<PomDependency> dependencies() {
+
+		return dependencies == null ? Stream.empty() : dependencies.stream();
+	}
 
 	public PomDependency dependency(String name) {
 
-		return dependencies.stream().filter(p -> p.name().equals(name)).findFirst().orElse(null);
+		return dependencies().filter(p -> p.name().equals(name)).findFirst().orElse(null);
 	}
 }

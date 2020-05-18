@@ -28,6 +28,7 @@ public class PomAnalyzer {
 
 		conflicts += analyzePluginManagement(src, ref);
 		conflicts += analyzeDependencyManagement(src, ref);
+		conflicts += analyzeDependencies(src, ref);
 
 		System.out.println(String.format("%1$d total conflicts", conflicts));
 	}
@@ -38,11 +39,11 @@ public class PomAnalyzer {
 
 		int conflicts = 0;
 
-		PomPluginManagement srcPluginManagement = src.build.pluginManagement;
-		PomPluginManagement refPluginManagement = ref.build.pluginManagement;
+		PomPluginManagement srcPluginManagement = src.build().pluginManagement();
+		PomPluginManagement refPluginManagement = ref.build().pluginManagement();
 
-		Set<String> srcNames = srcPluginManagement.plugins.stream().map(p -> p.name()).collect(toSet());
-		Set<String> refNames = refPluginManagement.plugins.stream().map(p -> p.name()).collect(toSet());
+		Set<String> srcNames = srcPluginManagement.plugins().map(p -> p.name()).collect(toSet());
+		Set<String> refNames = refPluginManagement.plugins().map(p -> p.name()).collect(toSet());
 
 		srcNames.retainAll(refNames);
 
@@ -67,14 +68,14 @@ public class PomAnalyzer {
 
 		int conflicts = 0;
 
-		PomDependencyManagement srcDependencyManagement = src.dependencyManagement;
-		PomDependencyManagement refDependencyManagement = ref.dependencyManagement;
+		PomDependencyManagement srcDependencyManagement = src.dependencyManagement();
+		PomDependencyManagement refDependencyManagement = ref.dependencyManagement();
 
 		if (srcDependencyManagement == null || refDependencyManagement == null)
 			return 0;
 
-		Set<String> srcNames = srcDependencyManagement.dependencies.stream().map(d -> d.name()).collect(toSet());
-		Set<String> refNames = refDependencyManagement.dependencies.stream().map(d -> d.name()).collect(toSet());
+		Set<String> srcNames = srcDependencyManagement.dependencies().map(d -> d.name()).collect(toSet());
+		Set<String> refNames = refDependencyManagement.dependencies().map(d -> d.name()).collect(toSet());
 
 		srcNames.retainAll(refNames);
 
@@ -89,6 +90,32 @@ public class PomAnalyzer {
 				++conflicts;
 			}
 		}
+		return conflicts;
+	}
+
+	private static int analyzeDependencies(PomModel src, PomModel ref) {
+
+		System.out.println("Analyzing dependencies");
+
+		int conflicts = 0;
+
+		Set<String> srcNames = src.dependencies().filter(d -> d.version() != null).map(d -> d.name()).collect(toSet());
+		Set<String> refNames = ref.dependencies().filter(d -> d.version() != null).map(d -> d.name()).collect(toSet());
+
+		srcNames.retainAll(refNames);
+
+		for (String name : srcNames) {
+
+			String srcVersion = src.dependency(name).version();
+			String refVersion = ref.dependency(name).version();
+
+			if (!srcVersion.equals(refVersion)) {
+
+				System.out.println(String.format("- %1$s [%2$s] vs [%3$s]", name, srcVersion, refVersion));
+				++conflicts;
+			}
+		}
+
 		return conflicts;
 	}
 }

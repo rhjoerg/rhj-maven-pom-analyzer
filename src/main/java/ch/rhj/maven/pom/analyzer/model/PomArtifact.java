@@ -7,13 +7,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class PomArtifact {
 
 	@JsonProperty("groupId")
-	public PomString groupId;
+	private PomString groupId;
 
 	@JsonProperty("artifactId")
-	public PomString artifactId;
+	private PomString artifactId;
 
 	@JsonProperty("version")
-	public PomString version;
+	private PomString version;
 
 	public String groupId() {
 
